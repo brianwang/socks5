@@ -8,7 +8,7 @@ import select
 import simplejson
 import time
 
-PORT = 1080
+PORT = 1082
 
 class ThreadingTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -29,6 +29,7 @@ class Hosts():
 hosts = Hosts()
 addr = Hosts()
 
+#local server
 class Sock5Local(SocketServer.StreamRequestHandler):
     def handle(self):
         print '[%s] socks connection from %s' % (time.ctime(), self.client_address)

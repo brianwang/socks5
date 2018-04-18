@@ -21,6 +21,7 @@ class Socks5Server(SocketServer.StreamRequestHandler):
             data = self.rfile.read(4)  
             mode = ord(data[1])  
             addrtype = ord(data[3])  
+            print addrtype
             if addrtype == 1:       # IPv4 
                 #print "Request for address type is IPv4"
                 addr = socket.inet_ntoa(self.rfile.read(4))  
@@ -29,15 +30,16 @@ class Socks5Server(SocketServer.StreamRequestHandler):
                 addr = self.rfile.read(ord(sock.recv(1)[0]))  
             port = struct.unpack('>H', self.rfile.read(2))  
             reply = b"\x05\x00\x00\x01"  
-            try:  
+            try:
+                print mode
                 if mode == 1:  # 1. Tcp connect  
                     remote = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
                     remote.connect((addr, port[0]))  
                     print '[%s] Tcp connect to %s %s' % (time.ctime(), addr, port[0])  
+                    local = remote.getsockname()  
+                    reply += socket.inet_aton(local[0]) + struct.pack(">H", local[1])  
                 else:  
-                    reply = b"\x05\x07\x00\x01" # Command not supported  
-                local = remote.getsockname()  
-                reply += socket.inet_aton(local[0]) + struct.pack(">H", local[1])  
+                    reply = b"\x05\x07\x00\x01" # Command not supported
             except socket.error:  
                 # Connection refused  
                 reply = '\x05\x05\x00\x01\x00\x00\x00\x00\x00\x00'  
@@ -49,7 +51,7 @@ class Socks5Server(SocketServer.StreamRequestHandler):
         except socket.error:  
             print 'socket error'  
 def main():  
-    server = ThreadingTCPServer(('', 9000), Socks5Server)  
+    server = ThreadingTCPServer(('', 5689), Socks5Server)  
     server.serve_forever()  
 if __name__ == '__main__':  
     main()
